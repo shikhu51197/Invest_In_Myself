@@ -33,7 +33,8 @@ export default function Upload() {
         alert('Post published successfully!');
         router.push('/');
       } else {
-        alert('Failed to publish post.');
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'Failed to publish post.');
       }
     } catch (err) {
       console.error(err);

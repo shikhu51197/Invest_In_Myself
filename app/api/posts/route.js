@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { kv } from '@vercel/kv';
 
 export async function GET() {
+  // If Vercel KV is configured, use it
+  if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+    try {
+      const posts = await kv.get('posts');
+      return NextResponse.json(posts || []);
+    } catch (err) {
+      console.error('Error reading from KV:', err);
+      return NextResponse.json([]);
+    }
+  }
+
+  // Fallback to local file system for local development
   const filePath = path.join(process.cwd(), 'app/data/posts.json');
   try {
     const fileData = fs.readFileSync(filePath, 'utf8');
@@ -15,9 +28,28 @@ export async function GET() {
 export async function POST(request) {
   try {
     const body = await request.json();
-    const filePath = path.join(process.cwd(), 'app/data/posts.json');
     
-    // Read existing
+    const newPost = {
+      id: Date.now().toString(),
+      date: new Date().toISOString(),
+      ...body
+    };
+
+    // If Vercel KV is configured, use it
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      try {
+        let posts = await kv.get('posts') || [];
+        posts.unshift(newPost);
+        await kv.set('posts', posts);
+        return NextResponse.json({ success: true, post: newPost });
+      } catch (kvError) {
+        console.error('KV Error:', kvError);
+        return NextResponse.json({ error: 'Failed to save post to KV Database: ' + kvError.message }, { status: 500 });
+      }
+    }
+
+    // Fallback to local file system for local development
+    const filePath = path.join(process.cwd(), 'app/data/posts.json');
     let posts = [];
     try {
       const fileData = fs.readFileSync(filePath, 'utf8');
@@ -26,21 +58,20 @@ export async function POST(request) {
       // file might not exist, ignore
     }
 
-    // Add new post
-    const newPost = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      ...body
-    };
-
-    posts.unshift(newPost); // Add to beginning
-
-    // Write back
-    fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+    posts.unshift(newPost);
+    try {
+      fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
+    } catch (fsError) {
+      if (process.env.VERCEL) {
+        return NextResponse.json({ error: 'You are on Vercel but Vercel KV is not configured! Please set it up in the Vercel Dashboard.' }, { status: 500 });
+      }
+      return NextResponse.json({ error: 'Failed to save to local file: ' + fsError.message }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, post: newPost });
   } catch (error) {
     console.error('Error saving post:', error);
-    return NextResponse.json({ error: 'Failed to save post' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to save post: ' + error.message }, { status: 500 });
   }
 }
+

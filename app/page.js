@@ -3,8 +3,8 @@ import { getPosts } from './data/postsStore';
 
 export const dynamic = 'force-dynamic'; // Prevent static caching
 
-export default function Home() {
-  const posts = getPosts();
+export default async function Home() {
+  const posts = await getPosts();
 
   return (
     <div className="container py-8">

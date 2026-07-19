@@ -1,8 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function ShareButtons({ title, text, url }) {
   const [copied, setCopied] = useState(false);
+  const [fullUrl, setFullUrl] = useState('');
+
+  useEffect(() => {
+    if (url.startsWith('http')) {
+      setFullUrl(url);
+    } else {
+      setFullUrl(window.location.origin + url);
+    }
+  }, [url]);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -10,24 +19,25 @@ export default function ShareButtons({ title, text, url }) {
         await navigator.share({
           title,
           text,
-          url,
+          url: fullUrl,
         });
       } catch (err) {
         console.error('Share failed:', err);
       }
     } else {
-      // Fallback: Copy to clipboard
       handleCopy();
     }
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(fullUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const encodedUrl = encodeURIComponent(url);
+  if (!fullUrl) return null; // Wait for hydration
+
+  const encodedUrl = encodeURIComponent(fullUrl);
   const encodedText = encodeURIComponent(`${title} - ${text}`);
 
   return (

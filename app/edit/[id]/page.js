@@ -1,0 +1,192 @@
+'use client';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
+
+const CATEGORIES = ['Poetry', 'Shayri', 'Songs', 'Sketches', 'Recipes', 'Blogs', 'Thoughts', 'Advice'];
+
+export default function EditPost({ params }) {
+  const router = useRouter();
+  const resolvedParams = use(params);
+  const postId = resolvedParams.id;
+
+  const [formData, setFormData] = useState({
+    title: '',
+    category: 'Thoughts',
+    content: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authHeader, setAuthHeader] = useState('');
+
+  useEffect(() => {
+    // Prompt for password right away
+    const secret = prompt('Enter Admin Password to Edit:');
+    if (!secret) {
+      alert('Password required to edit.');
+      router.push('/');
+      return;
+    }
+    setAuthHeader(secret);
+
+    // Fetch existing post data
+    fetch('/api/posts')
+      .then(res => res.json())
+      .then(posts => {
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+          setFormData({
+            title: post.title || '',
+            category: post.category || 'Thoughts',
+            content: post.content || '',
+          });
+        } else {
+          alert('Post not found.');
+          router.push('/');
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Failed to fetch post.');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [postId, router]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const res = await fetch(`/api/posts/${postId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      if (res.ok) {
+        alert('Post updated successfully!');
+        router.push(`/post/${postId}`);
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData.error || 'Failed to update post.');
+        if (res.status === 401) {
+          router.push('/'); // Incorrect password
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (loading) return <div className="container py-12 text-center">Loading...</div>;
+
+  return (
+    <div className="container py-12">
+      <div className="max-w-2xl mx-auto glass animate-fade-in" style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}>
+        <h1 className="font-serif gradient-text mb-8" style={{ fontSize: '2.5rem', textAlign: 'center' }}>
+          Edit Post
+        </h1>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="title" style={{ fontWeight: 500 }}>Title (Optional)</label>
+            <input 
+              type="text" 
+              id="title" 
+              name="title" 
+              value={formData.title} 
+              onChange={handleChange}
+              placeholder="Give your post a title..."
+              style={{
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '1rem'
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="category" style={{ fontWeight: 500 }}>Category</label>
+            <select 
+              id="category" 
+              name="category" 
+              value={formData.category} 
+              onChange={handleChange}
+              style={{
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '1rem'
+              }}
+            >
+              {CATEGORIES.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="content" style={{ fontWeight: 500 }}>Content (Unlimited Text)</label>
+            <textarea 
+              id="content" 
+              name="content" 
+              value={formData.content} 
+              onChange={handleChange}
+              required
+              placeholder="Write your heart out... HTML is supported for rich text formatting."
+              rows="12"
+              style={{
+                padding: '0.75rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-color)',
+                backgroundColor: 'var(--bg-primary)',
+                color: 'var(--text-primary)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '1rem',
+                resize: 'vertical'
+              }}
+            ></textarea>
+          </div>
+
+          <div className="mt-4 flex justify-end gap-4">
+            <button 
+              type="button" 
+              className="btn btn-outline" 
+              onClick={() => router.back()}
+              style={{ padding: '0.75rem 2rem', fontSize: '1.125rem' }}
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              disabled={isSubmitting}
+              style={{ padding: '0.75rem 2rem', fontSize: '1.125rem', opacity: isSubmitting ? 0.7 : 1 }}
+            >
+              {isSubmitting ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

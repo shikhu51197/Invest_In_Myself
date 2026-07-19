@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import ShareButtons from './ShareButtons';
 import MediaViewer from './MediaViewer';
+import AdminControls from './AdminControls';
 
 export default function PostCard({ post }) {
-  const postUrl = `https://emowords.app/post/${post.id}`; // Dummy URL for sharing
+  const postUrl = `/post/${post.id}`;
 
   return (
     <div className="glass animate-fade-in" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -54,8 +55,9 @@ export default function PostCard({ post }) {
         </div>
       )}
 
-      <div className="mt-auto pt-4" style={{ borderTop: '1px solid var(--border-color)' }}>
+      <div className="mt-auto pt-4 flex justify-between items-center" style={{ borderTop: '1px solid var(--border-color)' }}>
         <ShareButtons title={post.title || `A beautiful ${post.category}`} text="Check out this post on EmoWords" url={postUrl} />
+        <AdminControls postId={post.id} />
       </div>
     </div>
   );

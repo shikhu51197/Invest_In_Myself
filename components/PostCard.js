@@ -59,7 +59,7 @@ export default function PostCard({ post }) {
         <Link href={`/post/${post.id}`} className="btn-primary text-center" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', fontSize: '0.875rem', fontWeight: 500, width: '100%' }}>
           Read Full Post
         </Link>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-wrap justify-between items-center gap-2">
           <ShareButtons title={post.title || `A beautiful ${post.category}`} text="Check out this post on EmoWords" url={postUrl} />
           <AdminControls postId={post.id} />
         </div>

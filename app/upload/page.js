@@ -63,7 +63,7 @@ export default function Upload() {
 
   return (
     <div className="container py-12">
-      <div className="max-w-2xl mx-auto glass animate-fade-in" style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div className="max-w-2xl mx-auto glass animate-fade-in p-responsive" style={{ maxWidth: '800px', margin: '0 auto' }}>
         <h1 className="font-serif gradient-text mb-8" style={{ fontSize: '2.5rem', textAlign: 'center' }}>
           Create New Post
         </h1>

@@ -48,7 +48,7 @@ export default async function PostDetail({ params }) {
         &larr; Back to Home
       </Link>
       
-      <article className="glass animate-fade-in" style={{ padding: '3rem', maxWidth: '800px', margin: '0 auto' }}>
+      <article className="glass animate-fade-in p-responsive" style={{ maxWidth: '800px', margin: '0 auto' }}>
         <div className="flex justify-between items-center mb-6 border-b pb-4" style={{ borderColor: 'var(--border-color)' }}>
           <span style={{ 
             fontSize: '0.875rem', 

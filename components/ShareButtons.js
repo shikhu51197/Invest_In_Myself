@@ -41,7 +41,7 @@ export default function ShareButtons({ title, text, url }) {
   const encodedText = encodeURIComponent(`${title} - ${text}`);
 
   return (
-    <div className="flex gap-2 items-center mt-4">
+    <div className="flex flex-wrap gap-2 items-center mt-4">
       <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Share:</span>
       <button onClick={handleShare} className="btn-outline" style={{ padding: '0.5rem', borderRadius: 'var(--radius-full)' }} title="Native Share">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>

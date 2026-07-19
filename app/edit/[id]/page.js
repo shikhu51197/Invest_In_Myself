@@ -1,6 +1,10 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+import 'react-quill/dist/quill.snow.css';
 
 const CATEGORIES = ['Poetry', 'Shayri', 'Songs', 'Sketches', 'Recipes', 'Blogs', 'Thoughts', 'Advice'];
 
@@ -56,6 +60,19 @@ export default function EditPost({ params }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContentChange = (value) => {
+    setFormData(prev => ({ ...prev, content: value }));
+  };
+
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link', 'clean']
+    ]
   };
 
   const handleSubmit = async (e) => {
@@ -145,26 +162,18 @@ export default function EditPost({ params }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="content" style={{ fontWeight: 500 }}>Content (Unlimited Text)</label>
-            <textarea 
-              id="content" 
-              name="content" 
-              value={formData.content} 
-              onChange={handleChange}
-              required
-              placeholder="Write your heart out... HTML is supported for rich text formatting."
-              rows="12"
-              style={{
-                padding: '0.75rem',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--border-color)',
-                backgroundColor: 'var(--bg-primary)',
-                color: 'var(--text-primary)',
-                fontFamily: 'var(--font-sans)',
-                fontSize: '1rem',
-                resize: 'vertical'
-              }}
-            ></textarea>
+            <label htmlFor="content" style={{ fontWeight: 500 }}>Content (Rich Text)</label>
+            <div style={{ backgroundColor: 'white', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+              <ReactQuill 
+                theme="snow"
+                value={formData.content} 
+                onChange={handleContentChange}
+                modules={quillModules}
+                style={{ height: '300px', color: '#000' }}
+              />
+            </div>
+            {/* Added padding to prevent toolbar from overlapping the next element if it wraps, but ReactQuill handles this */}
+            <div style={{ height: '42px' }}></div>
           </div>
 
           <div className="mt-4 flex justify-end gap-4">

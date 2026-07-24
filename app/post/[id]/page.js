@@ -4,6 +4,7 @@ import ShareButtons from '../../../components/ShareButtons';
 import MediaViewer from '../../../components/MediaViewer';
 import AdminControls from '../../../components/AdminControls';
 import Link from 'next/link';
+import { getCategoryEmoji } from '../../../utils/emojiMap';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,11 +59,16 @@ export default async function PostDetail({ params }) {
             color: 'var(--accent-primary)',
             backgroundColor: 'var(--bg-secondary)',
             padding: '0.25rem 0.75rem',
-            borderRadius: 'var(--radius-full)'
+            borderRadius: 'var(--radius-full)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            width: 'fit-content'
           }}>
-            {post.category}
+            <span style={{ fontSize: '1.25rem' }}>{getCategoryEmoji(post.category)}</span>
+            <span>{post.category}</span>
           </span>
-          <span style={{ color: 'var(--text-secondary)' }}>
+          <span suppressHydrationWarning style={{ color: 'var(--text-secondary)' }}>
             {new Date(post.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
           </span>
         </div>
@@ -80,11 +86,8 @@ export default async function PostDetail({ params }) {
         )}
 
         <div 
-          className="post-content"
+          className="post-content-full"
           style={{ 
-            fontSize: '1.125rem', 
-            lineHeight: 1.8, 
-            color: 'var(--text-primary)',
             marginBottom: '3rem'
           }}
           dangerouslySetInnerHTML={{ __html: post.content }}

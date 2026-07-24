@@ -198,7 +198,7 @@ a {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 999;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -206,3 +206,67 @@ a {
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-secondary);
 }
+
+/* Post Content Formatting - Shared */
+.post-content,
+.post-content-preview,
+.post-content-full {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.post-content p,
+.post-content-preview p,
+.post-content-full p,
+.post-content ul,
+.post-content-preview ul,
+.post-content-full ul,
+.post-content ol,
+.post-content-preview ol,
+.post-content-full ol {
+  margin-bottom: 1.25rem;
+}
+
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content-preview h1,
+.post-content-preview h2,
+.post-content-preview h3,
+.post-content-full h1,
+.post-content-full h2,
+.post-content-full h3 {
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-serif);
+}
+
+/* Post Content Formatting - Detailed View (Full) */
+.post-content-full {
+  font-size: 1.125rem;
+  line-height: 1.9;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+}
+
+/* Elegant Drop Cap for the first paragraph of a full post */
+.post-content-full > p:first-of-type::first-letter {
+  float: left;
+  font-size: 4rem;
+  line-height: 0.8;
+  padding-top: 0.25rem;
+  padding-right: 0.5rem;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+/* Ensure highlighted text is bold */
+mark, .highlight {
+  font-weight: bold;
+}
+
+b, strong {
+  font-weight: bold;
+}
+

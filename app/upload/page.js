@@ -16,6 +16,33 @@ export default function Upload() {
     content: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fileUploading, setFileUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setFileUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      let mediaType = 'image';
+      if (file.type.startsWith('video/')) mediaType = 'video';
+      else if (file.type.startsWith('audio/')) mediaType = 'audio';
+      else if (!file.type.startsWith('image/')) mediaType = 'document';
+
+      setFormData(prev => ({
+        ...prev,
+        mediaUrl: reader.result,
+        mediaType: mediaType
+      }));
+      setFileUploading(false);
+    };
+    reader.onerror = () => {
+      alert('Error reading file!');
+      setFileUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -114,18 +141,27 @@ export default function Upload() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="media" style={{ fontWeight: 500 }}>Upload Media (Image/Video)</label>
-            <div style={{
+            <label htmlFor="media" style={{ fontWeight: 500 }}>Upload Media (Image / Video / Audio / Document)</label>
+            <label style={{
               border: '2px dashed var(--border-color)',
               padding: '2rem',
               borderRadius: 'var(--radius-md)',
               textAlign: 'center',
               color: 'var(--text-secondary)',
-              cursor: 'pointer'
+              cursor: fileUploading ? 'wait' : 'pointer',
+              backgroundColor: formData.mediaUrl ? 'var(--bg-secondary)' : 'transparent',
+              display: 'block'
             }}>
-              Click to browse or drag and drop a file here.
-              <input type="file" id="media" accept="image/*,video/*" style={{ display: 'none' }} />
-            </div>
+              {fileUploading ? 'Uploading...' : formData.mediaUrl ? 'File Selected (Click to change)' : 'Click to browse or drag and drop a file here.'}
+              <input 
+                type="file" 
+                id="media" 
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt" 
+                style={{ display: 'none' }} 
+                onChange={handleFileChange}
+                disabled={fileUploading}
+              />
+            </label>
           </div>
 
           <div className="flex flex-col gap-2">

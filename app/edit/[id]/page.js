@@ -21,6 +21,33 @@ export default function EditPost({ params }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [authHeader, setAuthHeader] = useState('');
+  const [fileUploading, setFileUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setFileUploading(true);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      let mediaType = 'image';
+      if (file.type.startsWith('video/')) mediaType = 'video';
+      else if (file.type.startsWith('audio/')) mediaType = 'audio';
+      else if (!file.type.startsWith('image/')) mediaType = 'document';
+
+      setFormData(prev => ({
+        ...prev,
+        mediaUrl: reader.result,
+        mediaType: mediaType
+      }));
+      setFileUploading(false);
+    };
+    reader.onerror = () => {
+      alert('Error reading file!');
+      setFileUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     // Prompt for password right away
@@ -42,6 +69,8 @@ export default function EditPost({ params }) {
             title: post.title || '',
             category: post.category || 'Thoughts',
             content: post.content || '',
+            mediaUrl: post.mediaUrl || '',
+            mediaType: post.mediaType || ''
           });
         } else {
           alert('Post not found.');
@@ -159,6 +188,40 @@ export default function EditPost({ params }) {
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="media" style={{ fontWeight: 500 }}>Upload Media (Image / Video / Audio / Document)</label>
+            <label style={{
+              border: '2px dashed var(--border-color)',
+              padding: '2rem',
+              borderRadius: 'var(--radius-md)',
+              textAlign: 'center',
+              color: 'var(--text-secondary)',
+              cursor: fileUploading ? 'wait' : 'pointer',
+              backgroundColor: formData.mediaUrl ? 'var(--bg-secondary)' : 'transparent',
+              display: 'block'
+            }}>
+              {fileUploading ? 'Uploading...' : formData.mediaUrl ? 'File Attached (Click to replace)' : 'Click to browse or drag and drop a file here.'}
+              <input 
+                type="file" 
+                id="media" 
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt" 
+                style={{ display: 'none' }} 
+                onChange={handleFileChange}
+                disabled={fileUploading}
+              />
+            </label>
+            {formData.mediaUrl && (
+              <button 
+                type="button" 
+                onClick={() => setFormData(prev => ({ ...prev, mediaUrl: '', mediaType: '' }))}
+                className="btn btn-outline"
+                style={{ marginTop: '0.5rem', alignSelf: 'flex-start', padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}
+              >
+                Remove Media
+              </button>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">

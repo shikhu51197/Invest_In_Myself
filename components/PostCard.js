@@ -2,6 +2,7 @@ import Link from 'next/link';
 import ShareButtons from './ShareButtons';
 import MediaViewer from './MediaViewer';
 import AdminControls from './AdminControls';
+import { getCategoryEmoji } from '../utils/emojiMap';
 
 export default function PostCard({ post }) {
   const postUrl = `/post/${post.id}`;
@@ -17,11 +18,15 @@ export default function PostCard({ post }) {
           color: 'var(--accent-primary)',
           backgroundColor: 'var(--bg-secondary)',
           padding: '0.25rem 0.75rem',
-          borderRadius: 'var(--radius-full)'
+          borderRadius: 'var(--radius-full)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.35rem'
         }}>
-          {post.category}
+          <span>{getCategoryEmoji(post.category)}</span>
+          <span>{post.category}</span>
         </span>
-        <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+        <span suppressHydrationWarning style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
           {new Date(post.date).toLocaleDateString()}
         </span>
       </div>
@@ -35,6 +40,7 @@ export default function PostCard({ post }) {
       {/* Render text content (truncated for card) */}
       {post.content && (
         <div 
+          className="post-content-preview"
           style={{ 
             color: 'var(--text-secondary)', 
             marginBottom: '1rem',

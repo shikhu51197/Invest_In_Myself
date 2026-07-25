@@ -1,5 +1,23 @@
 [
   {
+    "id": "medium_posts_showcase",
+    "category": "Blogs",
+    "title": "Medium Posts: AI & Full-Stack Web Engineering",
+    "content": "<p>Explore my technical publications on Medium, where I break down modern full-stack web development and cutting-edge artificial intelligence architectures!</p><br/><h3>Highlights from My Medium Blog:</h3><ul><li><strong>Building HireTrack Pro:</strong> An intelligent, AI-powered Applicant Tracking System engineered with Next.js, Node.js, and generative language models to streamline and elevate candidate analysis.</li><li><strong>Beginner's Guide to Web Development:</strong> Mastering the core foundational pillars of interactive web engineering—HTML5, styling architectures, and reactive JavaScript.</li></ul><p><em>Check out all my deep-dives and tutorials directly on my Medium profile!</em></p>",
+    "date": "2026-07-25T20:00:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
+  },
+  {
+    "id": "blogger_posts_showcase",
+    "category": "Blogs",
+    "title": "Blogger Posts: AI, ML & Digital Marketing Research Hub",
+    "content": "<p>Welcome to my specialized Artificial Intelligence, Machine Learning, and Digital Marketing publication on Blogger!</p><br/><h3>Core Topics Explored:</h3><ul><li><strong>Computer Vision Fundamentals:</strong> Deep dives into how intelligent machines perceive, segment, and understand visual data in the digital universe.</li><li><strong>AI/ML in Modern Digital Marketing:</strong> How data science, predictive personalization, and machine models transform automated commercial client engagement and brand strategy.</li></ul><p><em>Dive into practical research articles and foundational theory on my Blogger hub!</em></p>",
+    "date": "2026-07-25T19:45:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
+  },
+  {
     "id": "blog_portfolio_case_study",
     "category": "Blogs",
     "title": "Behind the Builds: Architecture of My Developer Portfolio & Real-World Projects",

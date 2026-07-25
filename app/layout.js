@@ -11,6 +11,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <div className="ambient-background">
+          <div className="ambient-orb orb-1"></div>
+          <div className="ambient-orb orb-2"></div>
+          <div className="ambient-orb orb-3"></div>
+        </div>
         <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
           <Navbar />
           <main style={{ flex: 1 }}>

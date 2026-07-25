@@ -198,8 +198,13 @@ a {
 .navbar {
   position: sticky;
   top: 0;
-  z-index: 999;
+  z-index: 9999;
   border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-primary) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  box-shadow: var(--shadow-sm);
 }
 
 .footer {

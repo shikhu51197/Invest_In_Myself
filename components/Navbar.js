@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <nav className="navbar glass">
+    <nav className="navbar">
       <div className="container flex flex-wrap items-center justify-between py-4 gap-4">
         <Link href="/" className="font-serif gradient-text" style={{ fontSize: '1.5rem', fontWeight: 700 }}>
           EmoWords

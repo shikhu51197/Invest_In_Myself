@@ -2,46 +2,73 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function POST(request) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file');
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file received.' }, { status: 400 });
+    const files = formData.getAll('files');
+    
+    // Fallback to check single 'file' key if present
+    if (files.length === 0 && formData.get('file')) {
+      files.push(formData.get('file'));
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+    if (files.length === 0) {
+      return NextResponse.json({ error: 'No files received by server.' }, { status: 400 });
+    }
 
-    // If running in a Vercel serverless environment (where filesystem is read-only)
-    if (process.env.VERCEL) {
-      if (!process.env.BLOB_READ_WRITE_TOKEN) {
-        // If file is under ~800KB (e.g. photos, short audio), gracefully fallback to base64 Data URL so preview testing works
-        if (buffer.length < 800 * 1024) {
-          const base64 = buffer.toString('base64');
-          const dataUrl = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
-          return NextResponse.json({ success: true, url: dataUrl });
-        }
-        return NextResponse.json({ 
-          error: 'On Vercel serverless deployment, writing large video/audio files directly to disk is restricted. Please connect Vercel Blob Storage in your dashboard for live cloud uploads!' 
-        }, { status: 500 });
+    const uploadedItems = [];
+
+    for (const file of files) {
+      if (typeof file === 'string' || !file.arrayBuffer) continue;
+
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const cleanName = (file.name || 'file').replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `${Date.now()}-${Math.floor(Math.random() * 10000)}-${cleanName}`;
+
+      let mediaType = 'image';
+      if ((file.type && file.type.startsWith('video/')) || filename.match(/\.(mp4|mov|webm|avi|mkv)$/i)) {
+        mediaType = 'video';
+      } else if ((file.type && file.type.startsWith('audio/')) || filename.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) {
+        mediaType = 'audio';
+      } else if (!file.type?.startsWith('image/') && !filename.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+        mediaType = 'document';
       }
+
+      // If running in a Vercel serverless environment (where filesystem is read-only)
+      if (process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN) {
+        const base64 = buffer.toString('base64');
+        const dataUrl = `data:${file.type || 'application/octet-stream'};base64,${base64}`;
+        uploadedItems.push({ url: dataUrl, type: mediaType, name: file.name || cleanName });
+        continue;
+      }
+
+      // Save directly to local public/uploads directory for local development and self-hosting
+      const uploadDir = path.join(process.cwd(), 'public/uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, filename);
+      await fs.promises.writeFile(filePath, buffer);
+      uploadedItems.push({ url: `/uploads/${filename}`, type: mediaType, name: file.name || cleanName });
     }
 
-    // Save directly to local public/uploads directory for local servers and self-hosting
-    const uploadDir = path.join(process.cwd(), 'public/uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    if (uploadedItems.length === 0) {
+      return NextResponse.json({ error: 'No valid binary files found to process.' }, { status: 400 });
     }
 
-    const filePath = path.join(uploadDir, filename);
-    await fs.promises.writeFile(filePath, buffer);
-
-    const fileUrl = `/uploads/${filename}`;
-    return NextResponse.json({ success: true, url: fileUrl });
+    return NextResponse.json({ 
+      success: true, 
+      mediaList: uploadedItems,
+      url: uploadedItems[0].url,
+      type: uploadedItems[0].type
+    });
   } catch (error) {
     console.error('Upload error:', error);
-    return NextResponse.json({ error: 'File upload failed: ' + error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Server exception during file upload: ' + error.message }, { status: 500 });
   }
 }

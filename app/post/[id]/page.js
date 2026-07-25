@@ -79,11 +79,23 @@ export default async function PostDetail({ params }) {
           </h1>
         )}
 
-        {post.mediaUrl && (
-          <div className="mb-8">
-            <MediaViewer url={post.mediaUrl} type={post.mediaType} alt={post.title} />
-          </div>
-        )}
+        {(() => {
+          const mediaItems = post.mediaList && post.mediaList.length > 0
+            ? post.mediaList
+            : post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType, name: post.title }] : [];
+            
+          if (mediaItems.length === 0) return null;
+
+          return (
+            <div className="mb-8 flex flex-col gap-6">
+              {mediaItems.map((media, index) => (
+                <div key={index}>
+                  <MediaViewer url={media.url} type={media.type} alt={media.name || `${post.title} media ${index + 1}`} />
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         <div 
           className="post-content-full"

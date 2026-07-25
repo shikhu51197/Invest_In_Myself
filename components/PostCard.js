@@ -55,11 +55,36 @@ export default function PostCard({ post }) {
       )}
 
       {/* Render media preview if available */}
-      {post.mediaUrl && (
-        <div style={{ marginBottom: '1rem' }}>
-           <MediaViewer url={post.mediaUrl} type={post.mediaType} alt={post.title || "Post media"} />
-        </div>
-      )}
+      {(() => {
+        const mediaItems = post.mediaList && post.mediaList.length > 0
+          ? post.mediaList
+          : post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType }] : [];
+          
+        if (mediaItems.length === 0) return null;
+        const firstMedia = mediaItems[0];
+        const extraCount = mediaItems.length - 1;
+
+        return (
+          <div style={{ marginBottom: '1rem' }}>
+            <MediaViewer url={firstMedia.url} type={firstMedia.type} alt={post.title || "Post media"} />
+            {extraCount > 0 && (
+              <div style={{ 
+                marginTop: '0.5rem', 
+                fontSize: '0.75rem', 
+                fontWeight: 600, 
+                color: 'var(--accent-primary)', 
+                backgroundColor: 'var(--bg-secondary)', 
+                padding: '0.35rem 0.75rem', 
+                borderRadius: 'var(--radius-full)', 
+                display: 'inline-block',
+                border: '1px solid var(--border-color)'
+              }}>
+                ✨ +{extraCount} more media file{extraCount !== 1 ? 's' : ''} inside
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="mt-auto pt-4 flex flex-col gap-3" style={{ borderTop: '1px solid var(--border-color)' }}>
         <Link href={`/post/${post.id}`} className="btn-primary text-center" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-full)', fontSize: '0.875rem', fontWeight: 500, width: '100%' }}>

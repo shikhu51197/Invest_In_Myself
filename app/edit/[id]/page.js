@@ -143,7 +143,8 @@ export default function EditPost({ params }) {
             category: post.category || 'Thoughts',
             content: post.content || '',
             mediaUrl: post.mediaUrl || '',
-            mediaType: post.mediaType || ''
+            mediaType: post.mediaType || '',
+            mediaList: post.mediaList || (post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType || 'image', name: post.title || 'Attached Media' }] : [])
           });
         } else {
           alert('Post not found.');

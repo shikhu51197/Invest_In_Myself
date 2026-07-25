@@ -54,34 +54,21 @@ export default function PostCard({ post }) {
         />
       )}
 
-      {/* Render media preview if available */}
+      {/* Render all attached media items (e.g. image + audio soundtrack) directly on card */}
       {(() => {
         const mediaItems = post.mediaList && post.mediaList.length > 0
           ? post.mediaList
-          : post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType }] : [];
+          : post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType, name: post.title }] : [];
           
         if (mediaItems.length === 0) return null;
-        const firstMedia = mediaItems[0];
-        const extraCount = mediaItems.length - 1;
 
         return (
-          <div style={{ marginBottom: '1rem' }}>
-            <MediaViewer url={firstMedia.url} type={firstMedia.type} alt={post.title || "Post media"} />
-            {extraCount > 0 && (
-              <div style={{ 
-                marginTop: '0.5rem', 
-                fontSize: '0.75rem', 
-                fontWeight: 600, 
-                color: 'var(--accent-primary)', 
-                backgroundColor: 'var(--bg-secondary)', 
-                padding: '0.35rem 0.75rem', 
-                borderRadius: 'var(--radius-full)', 
-                display: 'inline-block',
-                border: '1px solid var(--border-color)'
-              }}>
-                ✨ +{extraCount} more media file{extraCount !== 1 ? 's' : ''} inside
+          <div style={{ marginBottom: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {mediaItems.map((media, idx) => (
+              <div key={idx}>
+                <MediaViewer url={media.url} type={media.type} alt={media.name || `${post.title || "Post"} media`} isCard={true} />
               </div>
-            )}
+            ))}
           </div>
         );
       })()}

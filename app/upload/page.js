@@ -18,30 +18,41 @@ export default function Upload() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileUploading, setFileUploading] = useState(false);
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
     setFileUploading(true);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      let mediaType = 'image';
-      if (file.type.startsWith('video/')) mediaType = 'video';
-      else if (file.type.startsWith('audio/')) mediaType = 'audio';
-      else if (!file.type.startsWith('image/')) mediaType = 'document';
+    let mediaType = 'image';
+    if (file.type.startsWith('video/')) mediaType = 'video';
+    else if (file.type.startsWith('audio/')) mediaType = 'audio';
+    else if (!file.type.startsWith('image/')) mediaType = 'document';
 
-      setFormData(prev => ({
-        ...prev,
-        mediaUrl: reader.result,
-        mediaType: mediaType
-      }));
+    try {
+      const uploadData = new FormData();
+      uploadData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setFormData(prev => ({
+          ...prev,
+          mediaUrl: data.url,
+          mediaType: mediaType
+        }));
+      } else {
+        alert(data.error || 'Failed to upload file.');
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Error uploading file to server.');
+    } finally {
       setFileUploading(false);
-    };
-    reader.onerror = () => {
-      alert('Error reading file!');
-      setFileUploading(false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleChange = (e) => {

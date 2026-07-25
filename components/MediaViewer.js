@@ -9,10 +9,11 @@ export default function MediaViewer({ url, type, alt = "Media content" }) {
     return (
       <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', margin: '1rem 0' }}>
         <video 
+          src={url}
           controls 
+          playsInline
           style={{ width: '100%', maxHeight: '500px', backgroundColor: '#000', display: 'block' }}
         >
-          <source src={url} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       </div>
@@ -24,10 +25,10 @@ export default function MediaViewer({ url, type, alt = "Media content" }) {
       <div style={{ borderRadius: 'var(--radius-md)', overflow: 'hidden', margin: '1rem 0', padding: '1rem', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
         <h4 style={{ marginBottom: '0.5rem', fontFamily: 'var(--font-sans)', fontSize: '0.875rem' }}>Audio Track</h4>
         <audio 
+          src={url}
           controls 
           style={{ width: '100%', display: 'block' }}
         >
-          <source src={url} />
           Your browser does not support the audio tag.
         </audio>
       </div>

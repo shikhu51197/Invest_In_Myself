@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { compressImageIfNeeded } from '@/utils/imageOptimizer';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import 'react-quill-new/dist/quill.snow.css';
@@ -19,19 +20,36 @@ export default function Upload() {
   const [fileUploading, setFileUploading] = useState(false);
 
   const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+    const rawFiles = Array.from(e.target.files || []);
+    if (!rawFiles.length) return;
+
+    setFileUploading(true);
+    const files = [];
+
+    // Automagically compress and optimize large photos/PNGs in the browser before upload check
+    for (const file of rawFiles) {
+      if (file.type?.startsWith('image/') || file.name.match(/\.(png|jpg|jpeg|webp|tiff|bmp)$/i)) {
+        try {
+          const optimized = await compressImageIfNeeded(file);
+          files.push(optimized);
+        } catch (_) {
+          files.push(file);
+        }
+      } else {
+        files.push(file);
+      }
+    }
 
     // Vercel serverless has an infrastructure HTTP request body limit of ~4.5 MB.
     for (const file of files) {
       if (file.size > 4.2 * 1024 * 1024 && window.location.hostname.includes('vercel.app')) {
         alert(`❌ Upload Failed: "${file.name}" exceeds Vercel's 4.5 MB serverless HTTP upload limit!\n\nTo host and stream larger video/audio files online on Vercel, please connect cloud blob storage (such as Vercel Blob or AWS S3) in your dashboard.`);
-        e.target.value = '';
+        if (e.target) e.target.value = '';
+        setFileUploading(false);
         return;
       }
     }
     
-    setFileUploading(true);
     let mediaType = 'image';
     const firstFile = files[0];
     if ((firstFile.type && firstFile.type.startsWith('video/')) || firstFile.name.match(/\.(mp4|mov|webm|avi|mkv)$/i)) mediaType = 'video';

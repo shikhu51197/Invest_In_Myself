@@ -6,7 +6,7 @@ import AdminControls from '../../../components/AdminControls';
 import Link from 'next/link';
 import { getCategoryEmoji } from '../../../utils/emojiMap';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({ params }) {
   const resolvedParams = await params;

@@ -2,152 +2,146 @@ import HomeFeed from '../components/HomeFeed';
 import { getPosts } from './data/postsStore';
 import Link from 'next/link';
 
-export const dynamic = 'force-dynamic'; // Prevent static caching
+export const revalidate = 60; // Enable high-speed edge caching with 60s revalidation
 
 export default async function Home() {
   const posts = await getPosts();
 
-  // Calculate high-end collection analytics
-  const totalPosts = posts.length;
-  const techPosts = posts.filter(p => ['Blogs', 'Advice'].includes(p.category)).length;
-  const songPosts = posts.filter(p => p.category === 'Songs').length;
-  const creativePosts = posts.filter(p => ['Poetry', 'Shayri', 'Sketches', 'Recipes', 'Thoughts'].includes(p.category)).length;
+  // Calculate Real-time Collection Metrics
+  const totalCreations = posts.length;
+  const songCount = posts.filter(p => p.category === 'Songs' || p.mediaType === 'audio').length;
+  const blogCount = posts.filter(p => p.category === 'Blogs' || p.category === 'Tech').length;
+  const poetryCount = posts.filter(p => p.category === 'Poetry' || p.category === 'Shayri').length;
 
   return (
     <div className="container py-8">
-      {/* Executive Hero Showcase Suite */}
-      <div className="text-center mb-14 animate-fade-in" style={{ position: 'relative' }}>
+      
+      {/* 100% Pixel-Perfect Executive Hero Section */}
+      <section className="text-center py-16 mb-12 animate-fade-in relative" style={{ position: 'relative', zIndex: 2 }}>
         
-        {/* Animated Floating Pill Badge */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
-          <div 
-            className="animate-pulse-glow"
-            style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              gap: '0.6rem',
-              padding: '0.45rem 1.25rem', 
-              borderRadius: 'var(--radius-full)', 
-              backgroundColor: 'rgba(255, 255, 255, 0.04)', 
-              border: '1px solid var(--border-hover)',
-              boxShadow: '0 0 20px var(--accent-glow)',
-              fontSize: '0.88rem', 
-              fontWeight: 600, 
-              color: 'var(--text-primary)',
-              backdropFilter: 'blur(12px)'
-            }}
-          >
-            <span style={{ fontSize: '1.1rem' }}>⚡</span>
-            <span>Architectural Engineering & Soulful AI Compositions</span>
-            <span style={{ 
-              padding: '0.15rem 0.55rem', 
-              borderRadius: 'var(--radius-full)', 
-              backgroundColor: 'var(--accent-gradient)', 
-              color: 'white', 
-              fontSize: '0.72rem', 
-              fontWeight: 700, 
-              letterSpacing: '0.05em' 
-            }}>
-              V2.0 LIVE
-            </span>
-          </div>
+        {/* Animated V2.0 Glow Chip */}
+        <div style={{ display: 'inline-block', marginBottom: '1.5rem' }}>
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.6rem', 
+            padding: '0.45rem 1.15rem', 
+            borderRadius: 'var(--radius-full)', 
+            backgroundColor: 'rgba(99, 102, 241, 0.12)', 
+            border: '1px solid rgba(236, 72, 153, 0.35)', 
+            fontSize: '0.82rem', 
+            fontWeight: 700, 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.1em',
+            color: 'var(--text-primary)',
+            boxShadow: '0 0 25px var(--accent-glow)'
+          }}>
+            <span className="animate-pulse-glow" style={{ color: 'var(--accent-secondary)', fontSize: '1.1rem' }}>✦</span>
+            <span>Next-Gen Interactive Canvas & Architecture Hub</span>
+          </span>
         </div>
 
-        {/* Spectacular Hero Title */}
-        <h1 
-          className="font-display gradient-text" 
-          style={{ 
-            fontSize: 'clamp(2.8rem, 6.5vw, 4.8rem)', 
-            fontWeight: 800, 
-            marginBottom: '1.4rem', 
-            lineHeight: 1.1,
-            letterSpacing: '-0.04em',
-            maxWidth: '940px',
-            margin: '0 auto 1.4rem auto',
-            textShadow: '0 10px 40px var(--accent-glow)'
-          }}
-        >
-          Where Code Craftsmanship Meets Soulful Artistry.
+        {/* Headline with Modular Fluid Styling */}
+        <h1 className="font-display mb-6" style={{ fontSize: 'clamp(2.6rem, 5vw, 4.5rem)', fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1.1, maxWidth: '920px', margin: '0 auto 1.5rem' }}>
+          Where Logical Software Engineering Meets <span className="gradient-text">Lyrical Art</span>
         </h1>
 
-        {/* Executive Subtitle Narrative */}
-        <p style={{ 
-          fontSize: 'clamp(1.1rem, 2vw, 1.35rem)', 
-          color: 'var(--text-secondary)', 
-          maxWidth: '740px', 
-          margin: '0 auto 2.5rem auto',
-          lineHeight: 1.6,
-          fontWeight: 400
-        }}>
-          Explore a limitless digital canvas featuring <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>full-stack architecture</span> deep dives, acoustic <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>AI musical soundtracks</span>, and expressive human poetry.
+        {/* Subtitle */}
+        <p style={{ fontSize: 'clamp(1.1rem, 2vw, 1.25rem)', color: 'var(--text-secondary)', maxWidth: '680px', margin: '0 auto 2.75rem', lineHeight: 1.7, fontWeight: 400 }}>
+          Explore my complete developer ecosystem—featuring deep dive technical architectures, AI-composed musical soundtracks, expressive poetry, and real-time interactive engineering.
         </p>
 
-        {/* Live Collection Analytics Dashboard (Glassmorphism Tier) */}
-        <div 
-          className="glass"
-          style={{
-            maxWidth: '860px',
-            margin: '0 auto 2rem auto',
-            padding: '1.5rem 2rem',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-            gap: '1.5rem',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 20px 40px -15px rgba(0,0,0,0.5), 0 0 30px var(--accent-glow)',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Subtle Ambient top highlight */}
-          <div style={{ position: 'absolute', top: 0, left: '20%', right: '20%', height: '2px', background: 'var(--accent-gradient)' }}></div>
+        {/* Precision Hero Buttons with explicit generous vertical spacing and equalized baseline alignments */}
+        <div className="flex flex-wrap gap-4 justify-center items-center mb-16" style={{ marginBottom: '3.5rem', marginTop: '0.5rem' }}>
+          <Link 
+            href="/explore" 
+            className="btn btn-primary" 
+            style={{ 
+              height: '52px', 
+              padding: '0 2.2rem', 
+              fontSize: '1.02rem', 
+              fontWeight: 700, 
+              fontFamily: 'var(--font-display)',
+              borderRadius: 'var(--radius-full)', 
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.6rem'
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', lineHeight: 1 }}>⚡</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>Explore All Creations</span>
+          </Link>
+          <a 
+            href="https://shikhu51197.github.io/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="btn-outline" 
+            style={{ 
+              height: '52px', 
+              padding: '0 2.1rem', 
+              fontSize: '1.02rem', 
+              fontWeight: 700, 
+              fontFamily: 'var(--font-display)',
+              borderRadius: 'var(--radius-full)', 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '0.65rem', 
+              textDecoration: 'none' 
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', lineHeight: 1 }}>🌐</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>View Live Developer Portfolio</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem', lineHeight: 1, marginLeft: '0.1rem' }}>↗</span>
+          </a>
+        </div>
 
-          {/* Metric 1: Total Collection */}
-          <div className="text-center" style={{ borderRight: '1px dashed var(--border-color)' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
-              {totalPosts} <span style={{ fontSize: '1.2rem', color: 'var(--accent-primary)' }}>✦</span>
+        {/* 100% Pixel-Perfect Real-Time Collection Analytics Dashboard (Aligned to exact grid edge) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4" style={{ width: '100%' }}>
+          <div className="glass-card text-center" style={{ padding: '1.75rem 1.25rem' }}>
+            <div className="gradient-text font-display" style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+              {totalCreations}+
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '0.4rem' }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Total Creations
             </div>
           </div>
 
-          {/* Metric 2: AI Songs & Audio */}
-          <div className="text-center" style={{ borderRight: '1px dashed var(--border-color)' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
-              {songPosts} <span style={{ fontSize: '1.2rem', color: '#ec4899' }}>🎵</span>
+          <div className="glass-card text-center" style={{ padding: '1.75rem 1.25rem' }}>
+            <div className="gradient-text font-display" style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+              {songCount}
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '0.4rem' }}>
-              AI & Lyrical Songs
-            </div>
-          </div>
-
-          {/* Metric 3: Tech Blogs */}
-          <div className="text-center" style={{ borderRight: '1px dashed var(--border-color)' }}>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
-              {techPosts} <span style={{ fontSize: '1.2rem', color: '#10b981' }}>🚀</span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '0.4rem' }}>
-              Tech & Architecture
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+              <span>🎵 AI Songs</span>
             </div>
           </div>
 
-          {/* Metric 4: Poetry & Art */}
-          <div className="text-center">
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-display)', lineHeight: 1 }}>
-              {creativePosts} <span style={{ fontSize: '1.2rem', color: '#f59e0b' }}>📜</span>
+          <div className="glass-card text-center" style={{ padding: '1.75rem 1.25rem' }}>
+            <div className="gradient-text font-display" style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+              {blogCount}
             </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '0.4rem' }}>
-              Poetry & Art
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              💻 Tech Architectures
+            </div>
+          </div>
+
+          <div className="glass-card text-center" style={{ padding: '1.75rem 1.25rem' }}>
+            <div className="gradient-text font-display" style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.25rem' }}>
+              {poetryCount}
+            </div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              ✍️ Soulful Poetry
             </div>
           </div>
         </div>
 
-        {/* Decorative Divider */}
-        <div style={{ width: '80px', height: '4px', borderRadius: 'var(--radius-full)', background: 'var(--accent-gradient)', margin: '0 auto 1rem auto', opacity: 0.8 }}></div>
-      </div>
+      </section>
 
-      {/* Interactive Feed Suite with Bookmarks, Random Exploration & Quick Preview Modals */}
+      {/* Main Interactive Discovery Feed */}
       <HomeFeed initialPosts={posts} />
+
     </div>
   );
 }

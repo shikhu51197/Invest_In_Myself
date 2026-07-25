@@ -1,250 +1,245 @@
 'use client';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import ShareButtons from './ShareButtons';
 import MediaViewer from './MediaViewer';
-import AdminControls from './AdminControls';
 import { getCategoryEmoji } from '../utils/emojiMap';
 
-export default function PostCard({ post, onOpenQuickLook, onBookmarkToggle }) {
-  const postUrl = `/post/${post.id}`;
-  const [likeCount, setLikeCount] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [animateHeart, setAnimateHeart] = useState(false);
+export default function PostCard({ post, onQuickLook, isBookmarked = false, onToggleBookmark }) {
+  const [likes, setLikes] = useState(0);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [isAnimateHeart, setIsAnimateHeart] = useState(false);
 
   useEffect(() => {
-    // Load persisted Likes & Bookmarks for tactile client engagement
-    const storedLikes = localStorage.getItem(`emowords-like-${post.id}`);
-    if (storedLikes) {
-      setLikeCount(parseInt(storedLikes, 10) || 0);
-      setIsLiked(true);
-    } else {
-      // Seed a pleasant random starting count based on post.id so metrics look lively & engaging!
-      const seed = Math.abs((post.id || '1').split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 45 + 5;
-      setLikeCount(seed);
-    }
-
-    const storedBookmarks = JSON.parse(localStorage.getItem('emowords-bookmarks') || '[]');
-    setIsBookmarked(storedBookmarks.includes(post.id));
+    // Deterministic base like score from post title/id + persistent local increments
+    const baseLikes = Math.abs(String(post.id).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % 85 + 12;
+    const savedLikes = localStorage.getItem(`emowords-likes-count-${post.id}`);
+    const likedStatus = localStorage.getItem(`emowords-liked-${post.id}`) === 'true';
+    
+    setLikes(savedLikes ? parseInt(savedLikes, 10) : baseLikes);
+    setHasLiked(likedStatus);
   }, [post.id]);
 
   const handleLike = (e) => {
-    e.preventDefault();
     e.stopPropagation();
-    const newCount = isLiked ? likeCount + 1 : likeCount + 1;
-    setLikeCount(newCount);
-    setIsLiked(true);
-    setAnimateHeart(true);
-    localStorage.setItem(`emowords-like-${post.id}`, newCount.toString());
-    setTimeout(() => setAnimateHeart(false), 600);
+    const nextLiked = !hasLiked;
+    const nextCount = nextLiked ? likes + 1 : Math.max(0, likes - 1);
+    
+    setHasLiked(nextLiked);
+    setLikes(nextCount);
+    setIsAnimateHeart(true);
+    setTimeout(() => setIsAnimateHeart(false), 450);
+
+    localStorage.setItem(`emowords-liked-${post.id}`, String(nextLiked));
+    localStorage.setItem(`emowords-likes-count-${post.id}`, String(nextCount));
   };
 
-  const handleBookmark = (e) => {
-    e.preventDefault();
+  const handleBookmarkClick = (e) => {
     e.stopPropagation();
-    const storedBookmarks = JSON.parse(localStorage.getItem('emowords-bookmarks') || '[]');
-    let updated;
-    if (isBookmarked) {
-      updated = storedBookmarks.filter(id => id !== post.id);
-      setIsBookmarked(false);
-    } else {
-      updated = [...storedBookmarks, post.id];
-      setIsBookmarked(true);
-    }
-    localStorage.setItem('emowords-bookmarks', JSON.stringify(updated));
-    if (onBookmarkToggle) {
-      onBookmarkToggle(post.id, !isBookmarked);
+    if (onToggleBookmark) {
+      onToggleBookmark(post);
     }
   };
 
-  const isAudioPost = post.category === 'Songs' || post.mediaType === 'audio' || 
-    (post.mediaList && post.mediaList.some(m => m.type === 'audio' || (m.url && m.url.match(/\.(mp3|wav|ogg)$/i))));
+  const hasAudio = post.category === 'Songs' || post.mediaType === 'audio';
+  const displayMedia = post.mediaUrl || (post.mediaList && post.mediaList.length > 0 ? post.mediaList[0].url : null);
+  const displayMediaType = post.mediaType || (post.mediaList && post.mediaList.length > 0 ? post.mediaList[0].type : null);
 
   return (
-    <div className="glass-card animate-fade-in" style={{ padding: '1.6rem', display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Card Header: Category Badge + Audio Indicator + Date */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-2">
+    <div 
+      className="glass-card flex flex-col" 
+      style={{ 
+        padding: '2rem', 
+        height: '100%', 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        position: 'relative',
+        borderRadius: 'var(--radius-xl)'
+      }}
+    >
+      {/* Upper Card Region */}
+      <div>
+        {/* Category Header Bar & Engagement Icons */}
+        <div className="flex justify-between items-center mb-5" style={{ minHeight: '34px' }}>
           <span style={{ 
-            fontSize: '0.74rem', 
+            fontSize: '0.78rem', 
             fontWeight: 700, 
             textTransform: 'uppercase', 
-            letterSpacing: '0.06em',
-            color: 'var(--text-primary)',
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            border: '1px solid var(--border-color)',
-            padding: '0.3rem 0.85rem',
+            letterSpacing: '0.07em',
+            color: 'var(--accent-primary)',
+            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+            border: '1px solid rgba(99, 102, 241, 0.25)',
+            padding: '0.35rem 0.85rem',
             borderRadius: 'var(--radius-full)',
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            boxShadow: 'var(--shadow-sm)'
+            gap: '0.45rem',
+            lineHeight: 1
           }}>
-            <span>{getCategoryEmoji(post.category)}</span>
+            <span style={{ fontSize: '1.15rem' }}>{getCategoryEmoji(post.category)}</span>
             <span>{post.category}</span>
+            {hasAudio && (
+              <span className="soundwave-container" title="Audio Soundtrack Included" style={{ marginLeft: '0.2rem' }}>
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+                <span className="soundwave-bar"></span>
+              </span>
+            )}
           </span>
 
-          {/* Animated Soundwave indicator for acoustic AI songs & music */}
-          {isAudioPost && (
-            <div className="soundwave-container" title="Audio Soundtrack Included">
-              <span className="soundwave-bar"></span>
-              <span className="soundwave-bar"></span>
-              <span className="soundwave-bar"></span>
-              <span className="soundwave-bar"></span>
-            </div>
-          )}
-        </div>
-
-        <span suppressHydrationWarning style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-          {new Date(post.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-        </span>
-      </div>
-      
-      {/* Title */}
-      {post.title && (
-        <h3 className="font-display mb-3" style={{ fontSize: '1.35rem', fontWeight: 700, lineHeight: 1.3 }}>
-          <Link href={`/post/${post.id}`} className="hover:text-primary transition" style={{ textDecoration: 'none' }}>
-            {post.title}
-          </Link>
-        </h3>
-      )}
-
-      {/* Media Attachments */}
-      {(() => {
-        const mediaItems = post.mediaList && post.mediaList.length > 0
-          ? post.mediaList
-          : post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType, name: post.title }] : [];
-          
-        if (mediaItems.length === 0) return null;
-
-        return (
-          <div style={{ marginBottom: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {mediaItems.map((media, idx) => (
-              <div key={idx}>
-                <MediaViewer url={media.url} type={media.type} alt={media.name || `${post.title || "Post"} media`} isCard={true} />
-              </div>
-            ))}
-          </div>
-        );
-      })()}
-
-      {/* Truncated Rich Text Preview */}
-      {post.content && (
-        <div 
-          className="post-content-preview"
-          style={{ 
-            color: 'var(--text-secondary)', 
-            marginBottom: '1.5rem',
-            display: '-webkit-box',
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
-            fontSize: '0.96rem',
-            lineHeight: 1.7,
-            flexGrow: 1
-          }}
-          dangerouslySetInnerHTML={{ __html: post.content }}
-        />
-      )}
-
-      {/* Interactive Engagement Tier (Likes, Bookmarks, Quick Look) */}
-      <div className="mt-auto pt-4 flex flex-col gap-4" style={{ borderTop: '1px solid var(--border-color)' }}>
-        
-        {/* Row 1: Tactile Reactions & Bookmarking */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Animated Like Reaction Button */}
+          {/* Interactive Bookmark Pocket & Date */}
+          <div className="flex items-center gap-3">
+            <span suppressHydrationWarning style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {new Date(post.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
             <button
-              onClick={handleLike}
-              className={`btn-outline ${animateHeart ? 'animate-heart' : ''}`}
+              onClick={handleBookmarkClick}
               style={{
-                padding: '0.4rem 0.9rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.85rem',
-                display: 'inline-flex',
+                background: isBookmarked ? 'var(--accent-primary)' : 'rgba(255,255,255,0.04)',
+                border: '1px solid',
+                borderColor: isBookmarked ? 'var(--accent-primary)' : 'var(--border-color)',
+                borderRadius: '50%',
+                width: '36px',
+                height: '36px',
+                display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                backgroundColor: isLiked ? 'rgba(236, 72, 153, 0.15)' : 'transparent',
-                borderColor: isLiked ? '#ec4899' : 'var(--border-color)',
-                color: isLiked ? '#ec4899' : 'var(--text-secondary)',
-                fontWeight: 600
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                color: isBookmarked ? 'white' : 'var(--text-secondary)',
+                boxShadow: isBookmarked ? '0 0 14px var(--accent-glow)' : 'none'
               }}
-              title="Give Love"
+              title={isBookmarked ? "Remove from bookmarks" : "Bookmark this post"}
             >
-              <span>{isLiked ? '❤️' : '🤍'}</span>
-              <span>{likeCount}</span>
-            </button>
-
-            {/* Bookmark Toggle Button */}
-            <button
-              onClick={handleBookmark}
-              className="btn-outline"
-              style={{
-                padding: '0.4rem 0.9rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.85rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                backgroundColor: isBookmarked ? 'rgba(245, 158, 11, 0.15)' : 'transparent',
-                borderColor: isBookmarked ? '#f59e0b' : 'var(--border-color)',
-                color: isBookmarked ? '#f59e0b' : 'var(--text-secondary)',
-                fontWeight: 600
-              }}
-              title={isBookmarked ? 'Remove from Bookmarks' : 'Save to Pocket Shelf'}
-            >
-              <span>{isBookmarked ? '🔖' : '📑'}</span>
-              <span className="hidden sm:inline">{isBookmarked ? 'Saved' : 'Save'}</span>
+              <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>{isBookmarked ? '🔖' : '📑'}</span>
             </button>
           </div>
-
-          {/* Quick Look Drawer Button */}
-          {onOpenQuickLook && (
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpenQuickLook(post); }}
-              className="btn-outline"
-              style={{
-                padding: '0.4rem 0.9rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.82rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                borderColor: 'var(--glass-border)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.3rem'
-              }}
-              title="Quick preview without leaving page"
-            >
-              <span>⚡</span>
-              <span>Quick Look</span>
-            </button>
-          )}
         </div>
 
-        {/* Row 2: Read Full Post & Admin Options */}
-        <div className="flex flex-wrap justify-between items-center gap-3 pt-2" style={{ borderTop: '1px dashed var(--border-color)' }}>
-          <Link 
-            href={`/post/${post.id}`} 
-            className="btn btn-primary text-center" 
+        {/* Post Title */}
+        {post.title && (
+          <h2 
+            className="font-display mb-4" 
             style={{ 
-              padding: '0.55rem 1.4rem', 
-              borderRadius: 'var(--radius-full)', 
-              fontSize: '0.88rem', 
-              fontWeight: 600, 
-              flexGrow: 1, 
-              textDecoration: 'none', 
-              textAlign: 'center' 
+              fontSize: '1.45rem', 
+              fontWeight: 800, 
+              letterSpacing: '-0.025em',
+              lineHeight: 1.3,
+              color: 'var(--text-primary)' 
             }}
           >
-            Read Full Post ↗
-          </Link>
-          
-          <div className="flex items-center gap-2">
-            <ShareButtons title={post.title || `A beautiful ${post.category}`} text="Check out this post on EmoWords" url={postUrl} />
-            <AdminControls postId={post.id} />
+            <Link href={`/post/${post.id}`} style={{ textDecoration: 'none', transition: 'color 0.2s ease' }} className="hover:text-accent-primary">
+              {post.title}
+            </Link>
+          </h2>
+        )}
+
+        {/* Visual Aspect Media */}
+        {displayMedia && (
+          <div className="mb-5">
+            <MediaViewer url={displayMedia} type={displayMediaType} alt={post.title} isCard={true} />
           </div>
+        )}
+
+        {/* Truncated Preview Text (Cleaned of third-party network blocking iframes) */}
+        {post.content && (
+          <div 
+            className="post-content-preview"
+            style={{ 
+              color: 'var(--text-secondary)', 
+              marginBottom: '1.75rem',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              fontSize: '0.95rem',
+              lineHeight: 1.7
+            }}
+            dangerouslySetInnerHTML={{ __html: post.content.replace(/<iframe[\s\S]*?<\/iframe>/gi, '') }}
+          />
+        )}
+      </div>
+
+      {/* Footer Controls Alignment Layer (Guaranteed Equal Bottom Baseline) */}
+      <div style={{ marginTop: 'auto', paddingTop: '1.25rem', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        
+        {/* Interactive Like Counter with equalized 38px baseline height */}
+        <button
+          onClick={handleLike}
+          style={{
+            height: '38px',
+            background: hasLiked ? 'rgba(236, 72, 153, 0.15)' : 'rgba(255,255,255,0.04)',
+            border: '1px solid',
+            borderColor: hasLiked ? 'var(--accent-secondary)' : 'var(--border-color)',
+            padding: '0 1rem',
+            borderRadius: 'var(--radius-full)',
+            cursor: 'pointer',
+            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+            color: hasLiked ? 'var(--accent-secondary)' : 'var(--text-secondary)',
+            fontWeight: 700,
+            fontSize: '0.86rem',
+            fontFamily: 'var(--font-display)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.45rem',
+            userSelect: 'none'
+          }}
+        >
+          <span className={isAnimateHeart ? 'animate-heart' : ''} style={{ fontSize: '1.15rem', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+            {hasLiked ? '❤️' : '🤍'}
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>{likes}</span>
+        </button>
+
+        {/* Navigation Actions (Quick Look & Full Page) with matched baseline symmetry */}
+        <div className="flex items-center" style={{ gap: '0.6rem' }}>
+          {onQuickLook && (
+            <button
+              onClick={() => onQuickLook(post)}
+              className="btn-outline"
+              style={{ 
+                height: '38px', 
+                padding: '0 1.15rem', 
+                fontSize: '0.84rem', 
+                fontWeight: 700, 
+                fontFamily: 'var(--font-display)',
+                borderRadius: 'var(--radius-full)', 
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.4rem',
+                cursor: 'pointer',
+                userSelect: 'none'
+              }}
+              title="Quick Look Modal Preview"
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.05rem', lineHeight: 1 }}>⚡</span>
+              <span className="hidden sm:inline" style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>Quick Look</span>
+            </button>
+          )}
+          <Link 
+            href={`/post/${post.id}`} 
+            className="btn btn-primary" 
+            style={{ 
+              height: '38px', 
+              padding: '0 1.35rem', 
+              fontSize: '0.84rem', 
+              fontWeight: 700, 
+              fontFamily: 'var(--font-display)',
+              borderRadius: 'var(--radius-full)', 
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+              userSelect: 'none'
+            }}
+          >
+            <span style={{ display: 'inline-flex', alignItems: 'center', lineHeight: 1 }}>Explore</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.95rem', lineHeight: 1 }}>↗</span>
+          </Link>
         </div>
       </div>
     </div>

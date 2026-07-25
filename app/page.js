@@ -1,4 +1,4 @@
-import PostCard from '../components/PostCard';
+import HomeFeed from '../components/HomeFeed';
 import { getPosts } from './data/postsStore';
 
 export const dynamic = 'force-dynamic'; // Prevent static caching
@@ -8,22 +8,19 @@ export default async function Home() {
 
   return (
     <div className="container py-8">
-      <div className="text-center mb-12 animate-fade-in">
-        <h1 className="gradient-text font-serif" style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+      <div className="text-center mb-10 animate-fade-in">
+        <div style={{ display: 'inline-block', padding: '0.35rem 1rem', borderRadius: 'var(--radius-full)', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--accent-primary)' }}>
+          ✨ Tech, Art & Personal Expression Hub
+        </div>
+        <h1 className="gradient-text font-serif" style={{ fontSize: '3.2rem', fontWeight: 800, marginBottom: '1rem', letterSpacing: '-0.02em' }}>
           Welcome to EmoWords
         </h1>
-        <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
-          A limitless canvas for my poetry, shayri, songs, sketches, recipes, blogs, and raw thoughts.
+        <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '640px', margin: '0 auto' }}>
+          A limitless canvas where full-stack software engineering, generative AI exploration, and soulful creative arts converge.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {posts.map((post, index) => (
-          <div key={post.id} style={{ animationDelay: `${index * 0.1}s` }} className="animate-fade-in">
-            <PostCard post={post} />
-          </div>
-        ))}
-      </div>
+      <HomeFeed initialPosts={posts} />
     </div>
   );
 }

@@ -1,32 +1,54 @@
 [
   {
-    "id": "suno_song_1",
-    "category": "Songs",
-    "title": "Ethereal Tides",
-    "content": "<p>Listen to this beautiful new song I created:</p><br/><iframe width=\"100%\" height=\"120\" src=\"https://suno.com/embed/y7DLNu4NIMQ7QlD9\" frameBorder=\"0\" allow=\"clipboard-write\" allowFullScreen></iframe>",
-    "date": "2026-07-24T19:30:00Z",
-    "mediaUrl": "/uploads/suno_song_cover.jpg",
+    "id": "blog_portfolio_case_study",
+    "category": "Blogs",
+    "title": "Behind the Builds: Architecture of My Developer Portfolio & Real-World Projects",
+    "content": "<p>Welcome to my technical development journal! As a developer who thrives at the intersection of logical software design and imaginative visual art, I strongly believe that engineering is a creative endeavor.</p><hr/><h3>🌟 Explore My Interactive Portfolio</h3><p>You can discover my complete live digital portfolio and project demonstrations at my personal hub: <a href=\"https://shikhu51197.github.io/\" target=\"_blank\" rel=\"noopener noreferrer\" style=\"color: var(--accent-primary); font-weight: bold; text-decoration: underline;\">https://shikhu51197.github.io/</a></p><br/><h3>💡 Solving Real-World Problems with Code</h3><p>Every piece of software I design centers around solving tangible user friction. Whether building high-performance reactive interfaces in React and Next.js, integrating real-time generative AI workflows, or architecting intuitive creative canvases like <em>EmoWords</em>, my focus is always on resilience, performance, and delightful human interaction.</p><p>Check back regularly as I breakdown technical deep-dives into application scaling, cloud edge computing, and modern full-stack web solutions right here in this blog section!</p>",
+    "date": "2026-07-25T18:30:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=1000&auto=format&fit=crop&q=80",
     "mediaType": "image"
   },
   {
-    "id": "1784470178897",
-    "date": "2026-07-19T14:09:38.897Z",
-    "title": "dsfghjkl;'",
-    "category": "Thoughts",
-    "content": "zfdxgchvjbknlm,./"
+    "id": "blog_ai_music_fusion",
+    "category": "Blogs",
+    "title": "Composing Music with AI: The Convergence of Human Lyrics & Algorithmic Sound",
+    "content": "<p>One of my favorite features of EmoWords is our <strong>Songs</strong> repository—a dynamic sandbox where lyrical human poetry meets next-generation generative audio engineering.</p><br/><h3>🎵 How I Compose AI-Assisted Tracks</h3><p>While artificial intelligence can synthesize complex instruments and harmonies in seconds, the authentic emotional resonant heartbeat always comes from original human lyrics. When crafting songs for this application:</p><ul><li><strong>Step 1 (The Soul):</strong> I compose raw, introspective lyrics reflecting authentic human experiences.</li><li><strong>Step 2 (The Soundscape):</strong> I calibrate generative acoustic models and musical prompts (such as melodic acoustic folk, synthwave, or lo-fi ambient beats) to wrap around the emotional cadences of the poetry.</li><li><strong>Step 3 (The Integration):</strong> By pairing customized album cover artworks with built-in interactive audio soundtrack players, visitors can listen to full musical arrangements while appreciating the written poetry.</li></ul><p>Explore the <em>Songs</em> category above to hear how technology amplifies lyrical storytelling!</p>",
+    "date": "2026-07-25T16:15:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
+  },
+  {
+    "id": "blog_canvas_compression_tech",
+    "category": "Blogs",
+    "title": "Serverless Deep Dive: Overcoming Cloud HTTP Payload Limits with Browser Canvas Optimization",
+    "content": "<p>When deploying web applications on serverless edge networks (such as Vercel or AWS Lambda), developers inevitably encounter hard infrastructure API constraints—most notably a strict <strong>4.5 MB HTTP POST payload limit</strong>.</p><br/><h3>The Challenge of High-Def Media Uploads</h3><p>In modern social and portfolio platforms, users routinely attempt to attach raw 12MB smartphone pictures or high-resolution AI-generated PNG artwork. Sending these uncompressed files over standard API endpoints immediately triggers an HTTP <code>413 (Request Entity Too Large)</code> error before application logic even runs.</p><br/><h3>Our Zero-Friction Client-Side Solution</h3><p>To deliver a seamless, intuitive user experience on <em>EmoWords</em> without adding expensive cloud object storage overhead for simple photos, we engineered an automatic in-browser image optimization engine:</p><ol><li><strong>Real-Time File Interception:</strong> When a user selects a picture over 1 MB, the frontend reads the data array before network submission.</li><li><strong>HTML5 Canvas Scaling:</strong> The browser generates an in-memory 2D Canvas, caps maximum visual resolution to 2K (2560px), and strips redundant metadata.</li><li><strong>High-Fidelity JPEG Encoding:</strong> The raw PNG/photo is re-serialized into a pristine 85%-quality JPEG Blob, transforming an 11 MB upload into an ultra-fast ~400 KB payload in under 200 milliseconds.</li></ol><p>Engineering elegant software means solving technical hurdles invisibly, empowering creators to simply share their creativity!</p>",
+    "date": "2026-07-25T14:00:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
+  },
+  {
+    "id": "suno_song_1",
+    "category": "Songs",
+    "title": "Ethereal Tides (AI Soundtrack)",
+    "content": "<p>An atmospheric acoustic melody powered by algorithmic instrumentation, featuring my original lyric arrangements.</p><br/><iframe width=\"100%\" height=\"120\" src=\"https://suno.com/embed/y7DLNu4NIMQ7QlD9\" frameBorder=\"0\" allow=\"clipboard-write\" allowFullScreen></iframe>",
+    "date": "2026-07-24T19:30:00Z",
+    "mediaUrl": "/uploads/suno_song_cover.jpg",
+    "mediaType": "image"
   },
   {
     "id": "1",
     "category": "Poetry",
     "title": "Whispers of the Dawn",
     "content": "<p>The sky awakes in shades of gold,<br/>A story new, yet feeling old.<br/>The silent breeze begins to sing,<br/>Of hopes and dreams the morning brings.</p>",
-    "date": "2026-07-18T10:00:00Z"
+    "date": "2026-07-18T10:00:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
   },
   {
     "id": "2",
     "category": "Sketches",
     "title": "City in Charcoal",
-    "content": "<p>A quick charcoal sketch of the downtown skyline during golden hour.</p>",
+    "content": "<p>A quick charcoal study exploring the dramatic geometric silhouettes of the downtown skyline during the golden hour sunset.</p>",
     "date": "2026-07-17T14:30:00Z",
     "mediaUrl": "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=800&auto=format&fit=crop&q=60",
     "mediaType": "image"
@@ -35,30 +57,25 @@
     "id": "3",
     "category": "Recipes",
     "title": "Grandma's Secret Pasta",
-    "content": "<p><strong>Ingredients:</strong></p><ul><li>500g fresh pasta</li><li>3 cloves garlic</li><li>Olive oil</li><li>Fresh basil</li><li>Pecorino Romano</li></ul><p><strong>Instructions:</strong> Boil pasta until al dente. Sauté garlic in olive oil until golden. Toss pasta with oil, fresh basil, and a generous amount of cheese. Serve immediately!</p>",
+    "content": "<p><strong>Ingredients:</strong></p><ul><li>500g fresh artisan pasta</li><li>3 cloves crushed roasted garlic</li><li>Extra virgin olive oil</li><li>Fresh picked fragrant basil</li><li>Pecorino Romano cheese</li></ul><p><strong>Instructions:</strong> Boil pasta until perfectly al dente. Sauté garlic in olive oil until a golden toasted crust appears. Toss hot pasta with oil, fresh basil, and a generous grating of pecorino cheese. Serve immediately!</p>",
     "date": "2026-07-16T18:15:00Z",
     "mediaUrl": "https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800&auto=format&fit=crop&q=60",
     "mediaType": "image"
   },
   {
-    "id": "4",
-    "category": "Blogs",
-    "title": "How to Start Coding",
-    "content": "<p>Starting to code can feel overwhelming, but the key is consistency. Begin with the basics: HTML, CSS, and some JavaScript. Build small projects, and do not be afraid to make mistakes. Mistakes are how you learn!</p>",
-    "date": "2026-07-15T09:45:00Z"
-  },
-  {
     "id": "5",
     "category": "Shayri",
-    "title": "Dil Ki Baat",
+    "title": "Dil Ki Baat (Reflections of the Heart)",
     "content": "<p>Har dhadkan mein ek raaz hota hai,<br/>Har aansu mein ek jazbaat hota hai,<br/>Tum kya samjhoge is dil ka dard,<br/>Jisne khoya ho apna sab kuch, wahi barbaad hota hai.</p>",
-    "date": "2026-07-14T22:00:00Z"
+    "date": "2026-07-14T22:00:00Z",
+    "mediaUrl": "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1000&auto=format&fit=crop&q=80",
+    "mediaType": "image"
   },
   {
     "id": "6",
     "category": "Thoughts",
-    "title": "A Walk in the Woods",
-    "content": "<p>There is something incredibly grounding about walking in nature. The rustling leaves, the damp earth, the filtered sunlight... it all works together to quiet the mind.</p>",
+    "title": "A Walk in the Quiet Woods",
+    "content": "<p>There is something profound and incredibly grounding about walking in untamed nature. The gentle rustling of high autumn leaves, the scent of damp mossy earth, and the warm sunlight filtering through branches... it all unites to quiet an anxious mind.</p>",
     "date": "2026-07-13T11:20:00Z",
     "mediaUrl": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
     "mediaType": "video"

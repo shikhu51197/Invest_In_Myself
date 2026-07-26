@@ -129,7 +129,7 @@ export default function PostCard({ post, onQuickLook, isBookmarked = false, onTo
               color: 'var(--text-primary)' 
             }}
           >
-            <Link href={`/post/${post.id}`} style={{ textDecoration: 'none', transition: 'color 0.2s ease' }} className="hover:text-accent-primary">
+            <Link href={`/post/${post.id}`} prefetch={false} style={{ textDecoration: 'none', transition: 'color 0.2s ease' }} className="hover:text-accent-primary">
               {post.title}
             </Link>
           </h2>
@@ -221,6 +221,7 @@ export default function PostCard({ post, onQuickLook, isBookmarked = false, onTo
           )}
           <Link 
             href={`/post/${post.id}`} 
+            prefetch={false}
             className="btn btn-primary" 
             style={{ 
               height: '38px', 

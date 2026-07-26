@@ -273,6 +273,7 @@ export default function HomeFeed({ initialPosts = [] }) {
               </div>
               <Link
                 href={`/post/${quickLookPost.id}`}
+                prefetch={false}
                 className="btn btn-primary"
                 style={{ padding: '0 1.8rem', height: '46px', fontSize: '0.94rem' }}
                 onClick={() => setQuickLookPost(null)}

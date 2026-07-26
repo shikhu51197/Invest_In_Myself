@@ -2,6 +2,16 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { kv } from '@vercel/kv';
+import { revalidatePath } from 'next/cache';
+
+function checkAuth(request) {
+  const authHeader = request.headers.get('Authorization');
+  if (!process.env.ADMIN_SECRET) {
+    if (authHeader === 'local_dev' && !process.env.VERCEL) return true;
+    return false;
+  }
+  return authHeader === process.env.ADMIN_SECRET;
+}
 
 export async function GET() {
   // If Vercel KV is configured, use it
@@ -26,6 +36,10 @@ export async function GET() {
 }
 
 export async function POST(request) {
+  if (!checkAuth(request)) {
+    return NextResponse.json({ error: 'Unauthorized: Admin password required to publish posts.' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     
@@ -41,6 +55,10 @@ export async function POST(request) {
         let posts = await kv.get('posts') || [];
         posts.unshift(newPost);
         await kv.set('posts', posts);
+        try {
+          revalidatePath('/');
+          revalidatePath('/explore');
+        } catch (_) {}
         return NextResponse.json({ success: true, post: newPost });
       } catch (kvError) {
         console.error('KV Error:', kvError);
@@ -68,6 +86,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Failed to save to local file: ' + fsError.message }, { status: 500 });
     }
 
+    try {
+      revalidatePath('/');
+      revalidatePath('/explore');
+    } catch (_) {}
     return NextResponse.json({ success: true, post: newPost });
   } catch (error) {
     console.error('Error saving post:', error);

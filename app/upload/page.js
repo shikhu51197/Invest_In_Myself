@@ -1,8 +1,9 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { compressImageIfNeeded } from '@/utils/imageOptimizer';
+import PopupModal from '@/components/PopupModal';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import 'react-quill-new/dist/quill.snow.css';
@@ -18,6 +19,19 @@ export default function Upload() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileUploading, setFileUploading] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', variant: 'info', title: '', message: '' });
+
+  const showAlert = (title, message, variant = 'error', onClose = null, type = 'alert') => {
+    setModal({
+      isOpen: true,
+      type,
+      variant,
+      title,
+      message,
+      onClose: onClose || (() => setModal(prev => ({ ...prev, isOpen: false }))),
+      onConfirm: onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))
+    });
+  };
 
   const handleFileChange = async (e) => {
     const rawFiles = Array.from(e.target.files || []);
@@ -43,7 +57,7 @@ export default function Upload() {
     // Vercel serverless has an infrastructure HTTP request body limit of ~4.5 MB.
     for (const file of files) {
       if (file.size > 4.2 * 1024 * 1024 && window.location.hostname.includes('vercel.app')) {
-        alert(`❌ Upload Failed: "${file.name}" exceeds Vercel's 4.5 MB serverless HTTP upload limit!\n\nTo host and stream larger video/audio files online on Vercel, please connect cloud blob storage (such as Vercel Blob or AWS S3) in your dashboard.`);
+        showAlert('File Too Large 📦', `"${file.name}" exceeds Vercel's 4.5 MB serverless HTTP upload limit. Please attach smaller files or configure Cloud Blob storage.`, 'warning');
         if (e.target) e.target.value = '';
         setFileUploading(false);
         return;
@@ -94,11 +108,11 @@ export default function Upload() {
           };
         });
       } else {
-        alert(data.error || 'Failed to upload files.');
+        showAlert('Upload Failed ❌', data.error || 'Failed to upload media files.', 'error');
       }
     } catch (err) {
       console.error('Upload Error:', err);
-      alert('Upload Error: ' + err.message);
+      showAlert('Upload Error ❌', err.message || 'A network error occurred while uploading media.', 'error');
     } finally {
       setFileUploading(false);
       if (e.target) e.target.value = '';
@@ -135,27 +149,82 @@ export default function Upload() {
     ]
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
+    // Strict empty post validation
+    const titleTrimmed = (formData.title || '').trim();
+    const contentCleaned = (formData.content || '').replace(/<[^>]*>?/gm, '').trim();
+    const hasMedia = (formData.mediaList && formData.mediaList.length > 0) || formData.mediaUrl;
+
+    if (!titleTrimmed && !contentCleaned && !hasMedia) {
+      showAlert(
+        'Empty Post Attempted! ⚠️',
+        'You cannot publish an entirely empty post. Please provide a Title, write some Content, or attach at least one Media file before publishing.',
+        'warning'
+      );
+      return;
+    }
+
+    // Admin Authorization Check
+    const savedSecret = sessionStorage.getItem('emowords-admin-secret') || '';
+    if (!savedSecret) {
+      setModal({
+        isOpen: true,
+        type: 'prompt',
+        variant: 'secure',
+        isPassword: true,
+        title: 'Admin Authorization Required 🔐',
+        message: 'Since you are the Admin, only authenticated access can publish new creations. Please enter your Admin Password.',
+        placeholder: 'Enter Admin Password...',
+        confirmText: 'Authorize & Publish',
+        onConfirm: (secret) => {
+          if (!secret) return;
+          sessionStorage.setItem('emowords-admin-secret', secret);
+          executePublish(secret);
+        },
+        onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+      });
+      return;
+    }
+
+    executePublish(savedSecret);
+  };
+
+  const executePublish = async (secret) => {
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/posts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': secret
+        },
         body: JSON.stringify(formData)
       });
       
       if (res.ok) {
-        alert('Post published successfully!');
-        router.push('/');
+        showAlert(
+          'Creation Published! ✨',
+          'Your masterpiece has been live published to the EmoWords universe.',
+          'success',
+          () => {
+            router.push('/');
+            router.refresh();
+          }
+        );
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData.error || 'Failed to publish post.');
+        if (res.status === 401) {
+          sessionStorage.removeItem('emowords-admin-secret');
+          showAlert('Authorization Failed 🔒', 'Incorrect Admin Password! Only verified admins can create posts.', 'error');
+        } else {
+          showAlert('Publish Error ❌', errorData.error || 'Failed to publish post.', 'error');
+        }
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred.');
+      showAlert('Network Error ❌', 'An unexpected network error occurred while publishing.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -306,6 +375,19 @@ export default function Upload() {
           </div>
         </form>
       </div>
+
+      <PopupModal
+        isOpen={modal.isOpen}
+        onClose={modal.onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))}
+        type={modal.type}
+        variant={modal.variant}
+        title={modal.title}
+        message={modal.message}
+        placeholder={modal.placeholder}
+        confirmText={modal.confirmText}
+        isPassword={modal.isPassword}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 }

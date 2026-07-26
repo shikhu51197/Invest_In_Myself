@@ -2,6 +2,15 @@ import { NextResponse } from 'next/server';
 import { kv } from '@vercel/kv';
 import fs from 'fs';
 import path from 'path';
+import { revalidatePath } from 'next/cache';
+
+function triggerRevalidation(id) {
+  try {
+    revalidatePath('/');
+    revalidatePath('/explore');
+    revalidatePath(`/post/${id}`);
+  } catch (_) {}
+}
 
 function checkAuth(request) {
   const authHeader = request.headers.get('Authorization');
@@ -32,6 +41,7 @@ export async function PUT(request, { params }) {
       
       posts[index] = { ...posts[index], ...body };
       await kv.set('posts', posts);
+      triggerRevalidation(id);
       return NextResponse.json({ success: true, post: posts[index] });
     }
 
@@ -51,6 +61,7 @@ export async function PUT(request, { params }) {
     posts[index] = { ...posts[index], ...body };
     fs.writeFileSync(filePath, JSON.stringify(posts, null, 2));
 
+    triggerRevalidation(id);
     return NextResponse.json({ success: true, post: posts[index] });
   } catch (error) {
     console.error('Error updating post:', error);
@@ -74,6 +85,7 @@ export async function DELETE(request, { params }) {
       if (posts.length === newPosts.length) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
       
       await kv.set('posts', newPosts);
+      triggerRevalidation(id);
       return NextResponse.json({ success: true });
     }
 
@@ -92,6 +104,7 @@ export async function DELETE(request, { params }) {
     
     fs.writeFileSync(filePath, JSON.stringify(newPosts, null, 2));
 
+    triggerRevalidation(id);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting post:', error);

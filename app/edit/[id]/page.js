@@ -3,6 +3,7 @@ import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { compressImageIfNeeded } from '@/utils/imageOptimizer';
+import PopupModal from '@/components/PopupModal';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import 'react-quill-new/dist/quill.snow.css';
@@ -23,6 +24,19 @@ export default function EditPost({ params }) {
   const [loading, setLoading] = useState(true);
   const [authHeader, setAuthHeader] = useState('');
   const [fileUploading, setFileUploading] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, type: 'alert', variant: 'info', title: '', message: '' });
+
+  const showAlert = (title, message, variant = 'error', onClose = null, type = 'alert') => {
+    setModal({
+      isOpen: true,
+      type,
+      variant,
+      title,
+      message,
+      onClose: onClose || (() => setModal(prev => ({ ...prev, isOpen: false }))),
+      onConfirm: onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))
+    });
+  };
 
   const handleFileChange = async (e) => {
     const rawFiles = Array.from(e.target.files || []);
@@ -48,7 +62,7 @@ export default function EditPost({ params }) {
     // Vercel serverless has an infrastructure HTTP request body limit of ~4.5 MB.
     for (const file of files) {
       if (file.size > 4.2 * 1024 * 1024 && window.location.hostname.includes('vercel.app')) {
-        alert(`❌ Upload Failed: "${file.name}" exceeds Vercel's 4.5 MB serverless HTTP upload limit!\n\nTo host and stream larger video/audio files online on Vercel, please connect cloud blob storage (such as Vercel Blob or AWS S3) in your dashboard.`);
+        showAlert('File Too Large 📦', `"${file.name}" exceeds Vercel's 4.5 MB serverless HTTP upload limit. Please attach smaller files or configure Cloud Blob storage.`, 'warning');
         if (e.target) e.target.value = '';
         setFileUploading(false);
         return;
@@ -99,11 +113,11 @@ export default function EditPost({ params }) {
           };
         });
       } else {
-        alert(data.error || 'Failed to upload files.');
+        showAlert('Upload Failed ❌', data.error || 'Failed to upload media files.', 'error');
       }
     } catch (err) {
       console.error('Upload Error:', err);
-      alert('Upload Error: ' + err.message);
+      showAlert('Upload Error ❌', err.message || 'A network error occurred while uploading media.', 'error');
     } finally {
       setFileUploading(false);
       if (e.target) e.target.value = '';
@@ -122,17 +136,7 @@ export default function EditPost({ params }) {
     });
   };
 
-  useEffect(() => {
-    // Prompt for password right away
-    const secret = prompt('Enter Admin Password to Edit:');
-    if (!secret) {
-      alert('Password required to edit.');
-      router.push('/');
-      return;
-    }
-    setAuthHeader(secret);
-
-    // Fetch existing post data
+  const fetchPostData = (secret) => {
     fetch('/api/posts')
       .then(res => res.json())
       .then(posts => {
@@ -146,18 +150,44 @@ export default function EditPost({ params }) {
             mediaType: post.mediaType || '',
             mediaList: post.mediaList || (post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType || 'image', name: post.title || 'Attached Media' }] : [])
           });
+          setLoading(false);
         } else {
-          alert('Post not found.');
-          router.push('/');
+          showAlert('Not Found 🔍', 'The requested post could not be found.', 'error', () => router.push('/'));
         }
       })
       .catch(err => {
         console.error(err);
-        alert('Failed to fetch post.');
-      })
-      .finally(() => {
-        setLoading(false);
+        showAlert('Fetch Error ❌', 'Failed to fetch existing post data.', 'error', () => router.push('/'));
       });
+  };
+
+  useEffect(() => {
+    const savedSecret = sessionStorage.getItem('emowords-admin-secret');
+    if (!savedSecret) {
+      setModal({
+        isOpen: true,
+        type: 'prompt',
+        variant: 'secure',
+        isPassword: true,
+        title: 'Admin Authorization Required 🔐',
+        message: 'Please enter your Admin Password to unlock the creation editor.',
+        placeholder: 'Enter Admin Password...',
+        confirmText: 'Unlock Editor',
+        onConfirm: (secret) => {
+          if (!secret) {
+            router.push('/');
+            return;
+          }
+          sessionStorage.setItem('emowords-admin-secret', secret);
+          setAuthHeader(secret);
+          fetchPostData(secret);
+        },
+        onClose: () => router.push('/')
+      });
+    } else {
+      setAuthHeader(savedSecret);
+      fetchPostData(savedSecret);
+    }
   }, [postId, router]);
 
   const handleChange = (e) => {
@@ -180,8 +210,22 @@ export default function EditPost({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
     
+    // Strict empty post validation
+    const titleTrimmed = (formData.title || '').trim();
+    const contentCleaned = (formData.content || '').replace(/<[^>]*>?/gm, '').trim();
+    const hasMedia = (formData.mediaList && formData.mediaList.length > 0) || formData.mediaUrl;
+
+    if (!titleTrimmed && !contentCleaned && !hasMedia) {
+      showAlert(
+        'Empty Creation! ⚠️',
+        'You cannot save an entirely blank creation. Please provide a Title, rich Content, or attach Media.',
+        'warning'
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const res = await fetch(`/api/posts/${postId}`, {
         method: 'PUT',
@@ -193,24 +237,57 @@ export default function EditPost({ params }) {
       });
       
       if (res.ok) {
-        alert('Post updated successfully!');
-        router.push(`/post/${postId}`);
+        showAlert(
+          'Updated Successfully! ✨',
+          'Your edits have been permanently saved.',
+          'success',
+          () => router.push(`/post/${postId}`)
+        );
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData.error || 'Failed to update post.');
         if (res.status === 401) {
-          router.push('/'); // Incorrect password
+          sessionStorage.removeItem('emowords-admin-secret');
+          showAlert('Unauthorized 🔒', 'Incorrect Admin Password! Cannot update creation.', 'error', () => router.push('/'));
+        } else {
+          showAlert('Update Error ❌', errorData.error || 'Failed to update post.', 'error');
         }
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred.');
+      showAlert('Network Error ❌', 'An unexpected error occurred while saving changes.', 'error');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return <div className="container py-12 text-center">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="container py-20 text-center">
+        <div style={{ display: 'inline-block', width: '40px', height: '40px', borderRadius: '50%', border: '3px solid var(--border-color)', borderTopColor: 'var(--accent-primary)', animation: 'spin 1s linear infinite' }} />
+        <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>
+          {modal.isOpen ? 'Waiting for admin authorization...' : 'Loading creation editor...'}
+        </p>
+        <style jsx>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
+        <PopupModal
+          isOpen={modal.isOpen}
+          onClose={modal.onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))}
+          type={modal.type}
+          variant={modal.variant}
+          title={modal.title}
+          message={modal.message}
+          placeholder={modal.placeholder}
+          confirmText={modal.confirmText}
+          isPassword={modal.isPassword}
+          onConfirm={modal.onConfirm}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="container py-12">
@@ -374,6 +451,19 @@ export default function EditPost({ params }) {
           </div>
         </form>
       </div>
+
+      <PopupModal
+        isOpen={modal.isOpen}
+        onClose={modal.onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))}
+        type={modal.type}
+        variant={modal.variant}
+        title={modal.title}
+        message={modal.message}
+        placeholder={modal.placeholder}
+        confirmText={modal.confirmText}
+        isPassword={modal.isPassword}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 }

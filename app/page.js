@@ -2,7 +2,8 @@ import HomeFeed from '../components/HomeFeed';
 import { getPosts } from './data/postsStore';
 import Link from 'next/link';
 
-export const revalidate = 60; // Enable high-speed edge caching with 60s revalidation
+export const revalidate = 0; // Enable real-time instant feed refresh
+export const dynamic = 'force-dynamic';
 
 export default async function Home() {
   const posts = await getPosts();

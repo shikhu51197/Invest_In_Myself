@@ -4,6 +4,32 @@ import fs from 'fs';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
+export async function GET(request, { params }) {
+  try {
+    const resolvedParams = await params;
+    const id = resolvedParams.id;
+
+    if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+      const posts = await kv.get('posts') || [];
+      const post = posts.find(p => p.id === id);
+      if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+      return NextResponse.json(post);
+    }
+
+    const filePath = path.join(process.cwd(), 'app/data/posts.json');
+    if (fs.existsSync(filePath)) {
+      const posts = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+      const post = posts.find(p => p.id === id);
+      if (post) return NextResponse.json(post);
+    }
+    return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 function triggerRevalidation(id) {
   try {
     revalidatePath('/');

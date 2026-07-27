@@ -4,6 +4,8 @@ import path from 'path';
 import { kv } from '@vercel/kv';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 function checkAuth(request) {
   const authHeader = request.headers.get('Authorization');
   if (!process.env.ADMIN_SECRET) {
@@ -58,6 +60,8 @@ export async function POST(request) {
         try {
           revalidatePath('/');
           revalidatePath('/explore');
+          revalidatePath(`/post/${newPost.id}`);
+          revalidatePath('/post/[id]', 'page');
         } catch (_) {}
         return NextResponse.json({ success: true, post: newPost });
       } catch (kvError) {
@@ -89,6 +93,8 @@ export async function POST(request) {
     try {
       revalidatePath('/');
       revalidatePath('/explore');
+      revalidatePath(`/post/${newPost.id}`);
+      revalidatePath('/post/[id]', 'page');
     } catch (_) {}
     return NextResponse.json({ success: true, post: newPost });
   } catch (error) {

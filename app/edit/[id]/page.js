@@ -26,15 +26,21 @@ export default function EditPost({ params }) {
   const [fileUploading, setFileUploading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', variant: 'info', title: '', message: '' });
 
-  const showAlert = (title, message, variant = 'error', onClose = null, type = 'alert') => {
+  const showAlert = (title, message, variant = 'error', callback = null, type = 'alert') => {
+    const handleDismiss = () => {
+      setModal(prev => ({ ...prev, isOpen: false }));
+      if (callback) {
+        setTimeout(() => callback(), 50);
+      }
+    };
     setModal({
       isOpen: true,
       type,
       variant,
       title,
       message,
-      onClose: onClose || (() => setModal(prev => ({ ...prev, isOpen: false }))),
-      onConfirm: onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))
+      onClose: handleDismiss,
+      onConfirm: handleDismiss
     });
   };
 
@@ -137,27 +143,27 @@ export default function EditPost({ params }) {
   };
 
   const fetchPostData = (secret) => {
-    fetch('/api/posts')
-      .then(res => res.json())
-      .then(posts => {
-        const post = posts.find(p => p.id === postId);
-        if (post) {
-          setFormData({
-            title: post.title || '',
-            category: post.category || 'Thoughts',
-            content: post.content || '',
-            mediaUrl: post.mediaUrl || '',
-            mediaType: post.mediaType || '',
-            mediaList: post.mediaList || (post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType || 'image', name: post.title || 'Attached Media' }] : [])
-          });
-          setLoading(false);
-        } else {
-          showAlert('Not Found 🔍', 'The requested post could not be found.', 'error', () => router.push('/'));
+    fetch(`/api/posts/${postId}`)
+      .then(async res => {
+        if (!res.ok) {
+          throw new Error('Not found');
         }
+        return res.json();
+      })
+      .then(post => {
+        setFormData({
+          title: post.title || '',
+          category: post.category || 'Thoughts',
+          content: post.content || '',
+          mediaUrl: post.mediaUrl || '',
+          mediaType: post.mediaType || '',
+          mediaList: post.mediaList || (post.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType || 'image', name: post.title || 'Attached Media' }] : [])
+        });
+        setLoading(false);
       })
       .catch(err => {
         console.error(err);
-        showAlert('Fetch Error ❌', 'Failed to fetch existing post data.', 'error', () => router.push('/'));
+        showAlert('Not Found 🔍', 'The requested post could not be found.', 'error', () => router.push('/'));
       });
   };
 
@@ -174,6 +180,7 @@ export default function EditPost({ params }) {
         placeholder: 'Enter Admin Password...',
         confirmText: 'Unlock Editor',
         onConfirm: (secret) => {
+          setModal(prev => ({ ...prev, isOpen: false }));
           if (!secret) {
             router.push('/');
             return;
@@ -182,7 +189,10 @@ export default function EditPost({ params }) {
           setAuthHeader(secret);
           fetchPostData(secret);
         },
-        onClose: () => router.push('/')
+        onClose: () => {
+          setModal(prev => ({ ...prev, isOpen: false }));
+          router.push('/');
+        }
       });
     } else {
       setAuthHeader(savedSecret);

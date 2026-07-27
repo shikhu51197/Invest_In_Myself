@@ -9,6 +9,8 @@ export default function AdminControls({ postId }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', variant: 'info', title: '', message: '' });
 
+  const closePopup = () => setModal(prev => ({ ...prev, isOpen: false }));
+
   const handleDeleteClick = () => {
     setModal({
       isOpen: true,
@@ -18,8 +20,11 @@ export default function AdminControls({ postId }) {
       message: 'Are you completely sure you want to permanently delete this creation? This action cannot be undone.',
       confirmText: 'Yes, Proceed',
       cancelText: 'Cancel',
-      onConfirm: () => promptPassword(),
-      onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+      onConfirm: () => {
+        closePopup();
+        setTimeout(() => promptPassword(), 100);
+      },
+      onClose: closePopup
     });
   };
 
@@ -40,11 +45,12 @@ export default function AdminControls({ postId }) {
       placeholder: 'Enter Admin Password...',
       confirmText: 'Authorize & Delete',
       onConfirm: (secret) => {
+        closePopup();
         if (!secret) return;
         sessionStorage.setItem('emowords-admin-secret', secret);
         executeDelete(secret);
       },
-      onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+      onClose: closePopup
     });
   };
 
@@ -67,16 +73,22 @@ export default function AdminControls({ postId }) {
           message: 'The post has been removed from the EmoWords universe.',
           confirmText: 'Return to Hub',
           onConfirm: () => {
-            router.refresh();
-            if (window.location.pathname.includes(`/post/${postId}`)) {
-              router.push('/');
-            }
+            closePopup();
+            setTimeout(() => {
+              router.refresh();
+              if (window.location.pathname.includes(`/post/${postId}`)) {
+                router.push('/');
+              }
+            }, 50);
           },
           onClose: () => {
-            router.refresh();
-            if (window.location.pathname.includes(`/post/${postId}`)) {
-              router.push('/');
-            }
+            closePopup();
+            setTimeout(() => {
+              router.refresh();
+              if (window.location.pathname.includes(`/post/${postId}`)) {
+                router.push('/');
+              }
+            }, 50);
           }
         });
       } else {
@@ -89,7 +101,8 @@ export default function AdminControls({ postId }) {
             variant: 'error',
             title: 'Authorization Failed ❌',
             message: 'Incorrect Admin Password! Deletion permission denied.',
-            onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+            onConfirm: closePopup,
+            onClose: closePopup
           });
         } else {
           setModal({
@@ -98,7 +111,8 @@ export default function AdminControls({ postId }) {
             variant: 'error',
             title: 'Delete Error ❌',
             message: errorData.error || 'Failed to delete post.',
-            onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+            onConfirm: closePopup,
+            onClose: closePopup
           });
         }
       }
@@ -110,7 +124,8 @@ export default function AdminControls({ postId }) {
         variant: 'error',
         title: 'Network Error ❌',
         message: 'An unexpected network error occurred while deleting.',
-        onClose: () => setModal(prev => ({ ...prev, isOpen: false }))
+        onConfirm: closePopup,
+        onClose: closePopup
       });
     } finally {
       setIsDeleting(false);
@@ -133,7 +148,7 @@ export default function AdminControls({ postId }) {
 
       <PopupModal
         isOpen={modal.isOpen}
-        onClose={modal.onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))}
+        onClose={modal.onClose || closePopup}
         type={modal.type}
         variant={modal.variant}
         title={modal.title}
@@ -142,7 +157,7 @@ export default function AdminControls({ postId }) {
         confirmText={modal.confirmText}
         cancelText={modal.cancelText}
         isPassword={modal.isPassword}
-        onConfirm={modal.onConfirm}
+        onConfirm={modal.onConfirm || closePopup}
       />
     </div>
   );

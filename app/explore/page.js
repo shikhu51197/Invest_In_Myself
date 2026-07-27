@@ -1,18 +1,11 @@
-'use client';
-import { useState, useEffect } from 'react';
 import HomeFeed from '../../components/HomeFeed';
+import { getPosts } from '../data/postsStore';
 
-export default function Explore() {
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    fetch('/api/posts')
-      .then(res => res.json())
-      .then(data => setPosts(data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+export default async function Explore() {
+  const posts = await getPosts();
 
   return (
     <div className="container py-8">
@@ -25,22 +18,7 @@ export default function Explore() {
         </p>
       </div>
 
-      {loading ? (
-        <div className="text-center py-20">
-          <div style={{ display: 'inline-block', width: '40px', height: '40px', borderRadius: '50%', border: '3px solid var(--border-color)', borderTopColor: 'var(--accent-primary)', animation: 'spin 1s linear infinite' }} />
-          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.95rem', fontWeight: 500 }}>
-            Loading creative universe...
-          </p>
-          <style jsx>{`
-            @keyframes spin {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
-            }
-          `}</style>
-        </div>
-      ) : (
-        <HomeFeed initialPosts={posts} isExplorePage={true} />
-      )}
+      <HomeFeed initialPosts={posts} isExplorePage={true} />
     </div>
   );
 }

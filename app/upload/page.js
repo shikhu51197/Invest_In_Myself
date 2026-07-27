@@ -21,15 +21,21 @@ export default function Upload() {
   const [fileUploading, setFileUploading] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, type: 'alert', variant: 'info', title: '', message: '' });
 
-  const showAlert = (title, message, variant = 'error', onClose = null, type = 'alert') => {
+  const showAlert = (title, message, variant = 'error', callback = null, type = 'alert') => {
+    const handleDismiss = () => {
+      setModal(prev => ({ ...prev, isOpen: false }));
+      if (callback) {
+        setTimeout(() => callback(), 50);
+      }
+    };
     setModal({
       isOpen: true,
       type,
       variant,
       title,
       message,
-      onClose: onClose || (() => setModal(prev => ({ ...prev, isOpen: false }))),
-      onConfirm: onClose || (() => setModal(prev => ({ ...prev, isOpen: false })))
+      onClose: handleDismiss,
+      onConfirm: handleDismiss
     });
   };
 
@@ -179,6 +185,7 @@ export default function Upload() {
         placeholder: 'Enter Admin Password...',
         confirmText: 'Authorize & Publish',
         onConfirm: (secret) => {
+          setModal(prev => ({ ...prev, isOpen: false }));
           if (!secret) return;
           sessionStorage.setItem('emowords-admin-secret', secret);
           executePublish(secret);
